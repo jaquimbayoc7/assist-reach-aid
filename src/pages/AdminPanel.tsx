@@ -1,19 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { apiService } from '@/services/api';
+import { apiService, User } from '@/services/api';
 import { toast } from 'sonner';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Users } from 'lucide-react';
 
 export default function AdminPanel() {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerName, setRegisterName] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const { language } = useLanguage();
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    setIsLoadingUsers(true);
+    try {
+      const fetchedUsers = await apiService.getUsers();
+      setUsers(fetchedUsers);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 
+        (language === 'es' ? 'Error al cargar usuarios' : 'Error loading users'));
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,11 +56,25 @@ export default function AdminPanel() {
       setRegisterEmail('');
       setRegisterPassword('');
       setRegisterName('');
+      loadUsers();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 
         (language === 'es' ? 'Error al registrar médico' : 'Error registering doctor'));
     } finally {
       setIsRegistering(false);
+    }
+  };
+
+  const handleToggleUserStatus = async (userId: number, currentStatus: boolean) => {
+    try {
+      await apiService.updateUserStatus(userId, !currentStatus);
+      toast.success(language === 'es' 
+        ? 'Estado actualizado exitosamente' 
+        : 'Status updated successfully');
+      loadUsers();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 
+        (language === 'es' ? 'Error al actualizar estado' : 'Error updating status'));
     }
   };
 
@@ -115,6 +151,81 @@ export default function AdminPanel() {
                 : (language === 'es' ? 'Registrar Médico' : 'Register Doctor')}
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            <CardTitle>
+              {language === 'es' ? 'Gestión de Usuarios' : 'User Management'}
+            </CardTitle>
+          </div>
+          <CardDescription>
+            {language === 'es' 
+              ? 'Lista de todos los usuarios del sistema'
+              : 'List of all system users'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoadingUsers ? (
+            <p className="text-muted-foreground text-center py-4">
+              {language === 'es' ? 'Cargando usuarios...' : 'Loading users...'}
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{language === 'es' ? 'Nombre' : 'Name'}</TableHead>
+                  <TableHead>{language === 'es' ? 'Email' : 'Email'}</TableHead>
+                  <TableHead>{language === 'es' ? 'Rol' : 'Role'}</TableHead>
+                  <TableHead>{language === 'es' ? 'Estado' : 'Status'}</TableHead>
+                  <TableHead className="text-right">{language === 'es' ? 'Acciones' : 'Actions'}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                      {language === 'es' ? 'No hay usuarios registrados' : 'No users registered'}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.full_name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.is_active ? 'default' : 'destructive'}>
+                          {user.is_active 
+                            ? (language === 'es' ? 'Activo' : 'Active')
+                            : (language === 'es' ? 'Inactivo' : 'Inactive')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Label htmlFor={`status-${user.id}`} className="text-sm">
+                            {language === 'es' ? 'Activo' : 'Active'}
+                          </Label>
+                          <Switch
+                            id={`status-${user.id}`}
+                            checked={user.is_active}
+                            onCheckedChange={() => handleToggleUserStatus(user.id, user.is_active)}
+                          />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

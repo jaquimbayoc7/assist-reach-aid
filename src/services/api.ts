@@ -87,12 +87,27 @@ class ApiService {
   }
 
   async getUsers(skip: number = 0, limit: number = 100): Promise<User[]> {
-    const response = await fetch(`${API_BASE_URL}/admin/users?skip=${skip}&limit=${limit}`, {
+    const response = await fetch(`${API_BASE_URL}/admin/admin/users?skip=${skip}&limit=${limit}`, {
       headers: this.getHeaders(),
     });
 
     if (!response.ok) {
       throw new Error('Error al obtener usuarios');
+    }
+
+    return response.json();
+  }
+
+  async updateUserStatus(userId: number, isActive: boolean): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/admin/admin/users/${userId}/status`, {
+      method: 'PATCH',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ is_active: isActive }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Error al actualizar estado' }));
+      throw new Error(error.detail || 'Error al actualizar estado del usuario');
     }
 
     return response.json();
