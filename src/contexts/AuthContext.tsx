@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiService } from '@/services/api';
+import type { User as ApiUser } from '@/services/api';
 
 interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
+  role: 'admin' | 'médico';
 }
 
 interface AuthContextType {
@@ -22,35 +25,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for stored auth token
     const token = localStorage.getItem('authToken');
     const storedUser = localStorage.getItem('user');
     if (token && storedUser) {
       setUser(JSON.parse(storedUser));
+      apiService.setToken(token);
     }
     setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      // TODO: Replace with actual API call to FastAPI backend
-      // const response = await fetch('YOUR_API_URL/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password }),
-      // });
-      // const data = await response.json();
+      const response = await apiService.login({ username: email, password });
+      apiService.setToken(response.access_token);
       
-      // Mock login for now
-      const mockUser = {
-        id: '1',
-        email: email,
-        name: 'Healthcare Professional',
+      // Decode token to get user info (simple parsing, in production use a proper JWT library)
+      const tokenPayload = JSON.parse(atob(response.access_token.split('.')[1]));
+      
+      const userData: User = {
+        id: 0, // Will be populated when we fetch user details
+        email: tokenPayload.sub,
+        name: tokenPayload.sub.split('@')[0],
+        role: tokenPayload.role || 'médico',
       };
       
-      localStorage.setItem('authToken', 'mock-token');
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
       navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
@@ -59,6 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    apiService.clearToken();
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     setUser(null);

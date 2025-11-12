@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import Login from "./pages/Login";
+import LoginLanding from "./pages/LoginLanding";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import Predictions from "./pages/Predictions";
@@ -26,7 +26,7 @@ const App = () => (
             <Sonner />
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/login" element={<Login />} />
+              <Route path="/login" element={<LoginLanding />} />
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/patients" element={<Patients />} />
