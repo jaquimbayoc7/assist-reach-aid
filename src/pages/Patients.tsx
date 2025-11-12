@@ -365,7 +365,12 @@ export default function Patients() {
                   id="nivel_d1"
                   type="number"
                   value={formData.nivel_d1}
-                  onChange={(e) => setFormData({ ...formData, nivel_d1: Number(e.target.value) })}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    const newFormData = { ...formData, nivel_d1: newValue };
+                    const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                  }}
                   required
                 />
               </div>
@@ -376,7 +381,12 @@ export default function Patients() {
                   id="nivel_d2"
                   type="number"
                   value={formData.nivel_d2}
-                  onChange={(e) => setFormData({ ...formData, nivel_d2: Number(e.target.value) })}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    const newFormData = { ...formData, nivel_d2: newValue };
+                    const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                  }}
                   required
                 />
               </div>
@@ -387,7 +397,12 @@ export default function Patients() {
                   id="nivel_d3"
                   type="number"
                   value={formData.nivel_d3}
-                  onChange={(e) => setFormData({ ...formData, nivel_d3: Number(e.target.value) })}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    const newFormData = { ...formData, nivel_d3: newValue };
+                    const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                  }}
                   required
                 />
               </div>
@@ -398,7 +413,12 @@ export default function Patients() {
                   id="nivel_d4"
                   type="number"
                   value={formData.nivel_d4}
-                  onChange={(e) => setFormData({ ...formData, nivel_d4: Number(e.target.value) })}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    const newFormData = { ...formData, nivel_d4: newValue };
+                    const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                  }}
                   required
                 />
               </div>
@@ -409,7 +429,12 @@ export default function Patients() {
                   id="nivel_d5"
                   type="number"
                   value={formData.nivel_d5}
-                  onChange={(e) => setFormData({ ...formData, nivel_d5: Number(e.target.value) })}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    const newFormData = { ...formData, nivel_d5: newValue };
+                    const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                  }}
                   required
                 />
               </div>
@@ -420,7 +445,12 @@ export default function Patients() {
                   id="nivel_d6"
                   type="number"
                   value={formData.nivel_d6}
-                  onChange={(e) => setFormData({ ...formData, nivel_d6: Number(e.target.value) })}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    const newFormData = { ...formData, nivel_d6: newValue };
+                    const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                  }}
                   required
                 />
               </div>
@@ -431,8 +461,8 @@ export default function Patients() {
                   id="nivel_global"
                   type="number"
                   value={formData.nivel_global}
-                  onChange={(e) => setFormData({ ...formData, nivel_global: Number(e.target.value) })}
-                  required
+                  disabled
+                  className="bg-muted cursor-not-allowed"
                 />
               </div>
             </div>
