@@ -279,7 +279,11 @@ export default function Patients() {
                   id="fecha_nacimiento"
                   type="date"
                   value={formData.fecha_nacimiento}
-                  onChange={(e) => setFormData({ ...formData, fecha_nacimiento: e.target.value })}
+                  onChange={(e) => {
+                    const newDate = e.target.value;
+                    const calculatedAge = newDate ? Math.floor((new Date().getTime() - new Date(newDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : 0;
+                    setFormData({ ...formData, fecha_nacimiento: newDate, edad: calculatedAge });
+                  }}
                   required
                 />
               </div>
@@ -290,8 +294,8 @@ export default function Patients() {
                   id="edad"
                   type="number"
                   value={formData.edad}
-                  onChange={(e) => setFormData({ ...formData, edad: Number(e.target.value) })}
-                  required
+                  disabled
+                  className="bg-muted cursor-not-allowed"
                 />
               </div>
 
