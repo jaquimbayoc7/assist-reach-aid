@@ -343,12 +343,18 @@ export default function Patients() {
 
               <div className="col-span-2 space-y-2">
                 <Label htmlFor="causa_deficiencia">{t('deficiencyCause')}</Label>
-                <Input
-                  id="causa_deficiencia"
-                  value={formData.causa_deficiencia}
-                  onChange={(e) => setFormData({ ...formData, causa_deficiencia: e.target.value })}
-                  required
-                />
+                <Select value={formData.causa_deficiencia} onValueChange={(value) => setFormData({ ...formData, causa_deficiencia: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('deficiencyCause')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Enfermedad general">Enfermedad general</SelectItem>
+                    <SelectItem value="Accidente de tránsito">Accidente de tránsito</SelectItem>
+                    <SelectItem value="Alteración genética o hereditaria">Alteración genética o hereditaria</SelectItem>
+                    <SelectItem value="Complicaciones durante el parto">Complicaciones durante el parto</SelectItem>
+                    <SelectItem value="Violencia por delincuencia común">Violencia por delincuencia común</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
