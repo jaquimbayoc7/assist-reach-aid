@@ -331,22 +331,28 @@ export default function Patients() {
 
               <div className="space-y-2">
                 <Label htmlFor="cat_fisica">{t('physicalCategory')}</Label>
-                <Input
-                  id="cat_fisica"
-                  value={formData.cat_fisica}
-                  onChange={(e) => setFormData({ ...formData, cat_fisica: e.target.value })}
-                  required
-                />
+                <Select value={formData.cat_fisica} onValueChange={(value) => setFormData({ ...formData, cat_fisica: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('physicalCategory')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Sí">Sí</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="cat_psicosocial">{t('psychosocialCategory')}</Label>
-                <Input
-                  id="cat_psicosocial"
-                  value={formData.cat_psicosocial}
-                  onChange={(e) => setFormData({ ...formData, cat_psicosocial: e.target.value })}
-                  required
-                />
+                <Select value={formData.cat_psicosocial} onValueChange={(value) => setFormData({ ...formData, cat_psicosocial: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('psychosocialCategory')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Sí">Sí</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
