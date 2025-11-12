@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
-import { Globe, Activity, Brain, Users, TrendingUp } from 'lucide-react';
+import { Globe, Activity, Brain, Users } from 'lucide-react';
+import disabilityHero from '@/assets/disability-hero.jpg';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -212,32 +213,14 @@ export default function LoginLanding() {
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <TrendingUp className="h-6 w-6 text-primary mt-1" />
-              <div>
-                <h3 className="font-semibold">
-                  {language === 'es' ? 'Analytics Avanzado' : 'Advanced Analytics'}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {language === 'es' 
-                    ? 'Visualización de datos y tendencias'
-                    : 'Data visualization and trends'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Activity className="h-6 w-6 text-primary mt-1" />
-              <div>
-                <h3 className="font-semibold">
-                  {language === 'es' ? 'Tiempo Real' : 'Real-time'}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {language === 'es' 
-                    ? 'Predicciones instantáneas y precisas'
-                    : 'Instant and accurate predictions'}
-                </p>
-              </div>
-            </div>
+          </div>
+          
+          <div className="mt-8">
+            <img 
+              src={disabilityHero} 
+              alt="Physical disability support and assessment"
+              className="rounded-xl shadow-lg w-full object-cover max-h-64"
+            />
           </div>
         </div>
 
@@ -295,8 +278,8 @@ export default function LoginLanding() {
         <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
           <p>
             {language === 'es' 
-              ? 'Desarrollado por: Ing. Julián Andrés Quimbayo Castro, Ing. José Miguel Llanos Mosquera, Ing. Cindy Vargas Duque, Est. Willians Aguilar Rodríguez'
-              : 'Developed by: Eng. Julián Andrés Quimbayo Castro, Eng. José Miguel Llanos Mosquera, Eng. Cindy Vargas Duque, Stud. Willians Aguilar Rodríguez'}
+              ? 'Desarrollado por: Ing. Julián Andrés Quimbayo Castro'
+              : 'Developed by: Eng. Julián Andrés Quimbayo Castro'}
           </p>
         </div>
       </footer>
