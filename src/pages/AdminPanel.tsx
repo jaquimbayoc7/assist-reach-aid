@@ -7,10 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiService, User } from '@/services/api';
 import { toast } from 'sonner';
-import { UserPlus, Users } from 'lucide-react';
+import { UserPlus, Users, Copy, Check } from 'lucide-react';
 
 export default function AdminPanel() {
   const [registerEmail, setRegisterEmail] = useState('');
@@ -20,6 +21,10 @@ export default function AdminPanel() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState<{email: string, password: string, name: string}>({ email: '', password: '', name: '' });
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedPassword, setCopiedPassword] = useState(false);
   const { language } = useLanguage();
 
   useEffect(() => {
@@ -44,6 +49,13 @@ export default function AdminPanel() {
     setIsRegistering(true);
     
     try {
+      // Store credentials before clearing the form
+      const credentials = {
+        email: registerEmail,
+        password: registerPassword,
+        name: registerName
+      };
+
       await apiService.registerDoctor({
         email: registerEmail,
         password: registerPassword,
@@ -55,6 +67,10 @@ export default function AdminPanel() {
         ? 'Usuario registrado exitosamente' 
         : 'User registered successfully');
       
+      // Show credentials modal
+      setCreatedCredentials(credentials);
+      setShowCredentialsModal(true);
+      
       setRegisterEmail('');
       setRegisterPassword('');
       setRegisterName('');
@@ -65,6 +81,22 @@ export default function AdminPanel() {
         (language === 'es' ? 'Error al registrar usuario' : 'Error registering user'));
     } finally {
       setIsRegistering(false);
+    }
+  };
+
+  const copyToClipboard = async (text: string, type: 'email' | 'password') => {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (type === 'email') {
+        setCopiedEmail(true);
+        setTimeout(() => setCopiedEmail(false), 2000);
+      } else {
+        setCopiedPassword(true);
+        setTimeout(() => setCopiedPassword(false), 2000);
+      }
+      toast.success(language === 'es' ? 'Copiado al portapapeles' : 'Copied to clipboard');
+    } catch (error) {
+      toast.error(language === 'es' ? 'Error al copiar' : 'Error copying');
     }
   };
 
@@ -249,6 +281,76 @@ export default function AdminPanel() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={showCredentialsModal} onOpenChange={setShowCredentialsModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-green-600" />
+              {language === 'es' ? 'Usuario Creado Exitosamente' : 'User Created Successfully'}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'es' 
+                ? 'Guarde estas credenciales y envíelas al usuario. No podrá verlas nuevamente.'
+                : 'Save these credentials and send them to the user. You won\'t be able to see them again.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                {language === 'es' ? 'Nombre' : 'Name'}
+              </Label>
+              <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+                <span className="text-sm font-mono">{createdCredentials.name}</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                {language === 'es' ? 'Correo Electrónico' : 'Email'}
+              </Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 p-3 bg-muted rounded-md">
+                  <span className="text-sm font-mono break-all">{createdCredentials.email}</span>
+                </div>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => copyToClipboard(createdCredentials.email, 'email')}
+                >
+                  {copiedEmail ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                {language === 'es' ? 'Contraseña' : 'Password'}
+              </Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 p-3 bg-muted rounded-md">
+                  <span className="text-sm font-mono break-all">{createdCredentials.password}</span>
+                </div>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => copyToClipboard(createdCredentials.password, 'password')}
+                >
+                  {copiedPassword ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+            <div className="pt-2 text-sm text-muted-foreground">
+              {language === 'es' 
+                ? '💡 Consejo: Copie estas credenciales y envíelas al usuario por un canal seguro.'
+                : '💡 Tip: Copy these credentials and send them to the user via a secure channel.'}
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setShowCredentialsModal(false)}>
+              {language === 'es' ? 'Cerrar' : 'Close'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
