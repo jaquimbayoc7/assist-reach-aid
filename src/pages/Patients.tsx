@@ -369,7 +369,7 @@ export default function Patients() {
                     const newValue = Number(e.target.value);
                     const newFormData = { ...formData, nivel_d1: newValue };
                     const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
-                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg) });
                   }}
                   required
                 />
@@ -385,7 +385,7 @@ export default function Patients() {
                     const newValue = Number(e.target.value);
                     const newFormData = { ...formData, nivel_d2: newValue };
                     const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
-                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg) });
                   }}
                   required
                 />
@@ -401,7 +401,7 @@ export default function Patients() {
                     const newValue = Number(e.target.value);
                     const newFormData = { ...formData, nivel_d3: newValue };
                     const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
-                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg) });
                   }}
                   required
                 />
@@ -417,7 +417,7 @@ export default function Patients() {
                     const newValue = Number(e.target.value);
                     const newFormData = { ...formData, nivel_d4: newValue };
                     const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
-                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg) });
                   }}
                   required
                 />
@@ -433,7 +433,7 @@ export default function Patients() {
                     const newValue = Number(e.target.value);
                     const newFormData = { ...formData, nivel_d5: newValue };
                     const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
-                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg) });
                   }}
                   required
                 />
@@ -449,7 +449,7 @@ export default function Patients() {
                     const newValue = Number(e.target.value);
                     const newFormData = { ...formData, nivel_d6: newValue };
                     const avg = (newFormData.nivel_d1 + newFormData.nivel_d2 + newFormData.nivel_d3 + newFormData.nivel_d4 + newFormData.nivel_d5 + newFormData.nivel_d6) / 6;
-                    setFormData({ ...newFormData, nivel_global: Math.round(avg * 100) / 100 });
+                    setFormData({ ...newFormData, nivel_global: Math.round(avg) });
                   }}
                   required
                 />
