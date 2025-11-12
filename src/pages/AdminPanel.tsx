@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ export default function AdminPanel() {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerName, setRegisterName] = useState('');
+  const [registerRole, setRegisterRole] = useState<'admin' | 'médico'>('médico');
   const [isRegistering, setIsRegistering] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -46,20 +48,21 @@ export default function AdminPanel() {
         email: registerEmail,
         password: registerPassword,
         full_name: registerName,
-        role: 'médico'
+        role: registerRole
       });
       
       toast.success(language === 'es' 
-        ? 'Médico registrado exitosamente' 
-        : 'Doctor registered successfully');
+        ? 'Usuario registrado exitosamente' 
+        : 'User registered successfully');
       
       setRegisterEmail('');
       setRegisterPassword('');
       setRegisterName('');
+      setRegisterRole('médico');
       loadUsers();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 
-        (language === 'es' ? 'Error al registrar médico' : 'Error registering doctor'));
+        (language === 'es' ? 'Error al registrar usuario' : 'Error registering user'));
     } finally {
       setIsRegistering(false);
     }
@@ -96,13 +99,13 @@ export default function AdminPanel() {
           <div className="flex items-center gap-2">
             <UserPlus className="h-5 w-5 text-primary" />
             <CardTitle>
-              {language === 'es' ? 'Registrar Nuevo Médico' : 'Register New Doctor'}
+              {language === 'es' ? 'Creación de Usuario' : 'User Creation'}
             </CardTitle>
           </div>
           <CardDescription>
             {language === 'es' 
-              ? 'Complete el formulario para crear una cuenta de médico'
-              : 'Fill out the form to create a doctor account'}
+              ? 'Complete el formulario para crear una nueva cuenta de usuario'
+              : 'Fill out the form to create a new user account'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -145,10 +148,28 @@ export default function AdminPanel() {
                 required
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="register-role">
+                {language === 'es' ? 'Rol' : 'Role'}
+              </Label>
+              <Select value={registerRole} onValueChange={(value: 'admin' | 'médico') => setRegisterRole(value)}>
+                <SelectTrigger id="register-role">
+                  <SelectValue placeholder={language === 'es' ? 'Seleccione un rol' : 'Select a role'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="médico">
+                    {language === 'es' ? 'Médico' : 'Doctor'}
+                  </SelectItem>
+                  <SelectItem value="admin">
+                    {language === 'es' ? 'Administrador' : 'Administrator'}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button type="submit" className="w-full" disabled={isRegistering}>
               {isRegistering 
                 ? (language === 'es' ? 'Registrando...' : 'Registering...') 
-                : (language === 'es' ? 'Registrar Médico' : 'Register Doctor')}
+                : (language === 'es' ? 'Registrar Usuario' : 'Register User')}
             </Button>
           </form>
         </CardContent>

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Activity, BarChart3, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Activity, BarChart3, UserCog, Settings, LogOut } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -21,6 +21,7 @@ const menuItems = [
   { title: 'patients', url: '/patients', icon: Users },
   { title: 'predictions', url: '/predictions', icon: Activity },
   { title: 'analytics', url: '/analytics', icon: BarChart3 },
+  { title: 'userList', url: '/admin', icon: UserCog },
 ];
 
 export function AppSidebar() {

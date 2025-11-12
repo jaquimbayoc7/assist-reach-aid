@@ -15,6 +15,7 @@ const translations = {
     patients: 'Patients',
     predictions: 'Predictions',
     analytics: 'Analytics',
+    userList: 'User List',
     settings: 'Settings',
     logout: 'Logout',
     
@@ -75,6 +76,7 @@ const translations = {
     patients: 'Pacientes',
     predictions: 'Predicciones',
     analytics: 'Análisis',
+    userList: 'Listado de Usuarios',
     settings: 'Configuración',
     logout: 'Cerrar Sesión',
     
