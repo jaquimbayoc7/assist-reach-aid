@@ -28,11 +28,24 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { t } = useLanguage();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const currentPath = location.pathname;
   const collapsed = state === 'collapsed';
 
   const isActive = (path: string) => currentPath === path;
+
+  // Filter menu items based on user role
+  const filteredMenuItems = menuItems.filter((item) => {
+    // Hide patients, predictions, and analytics for admin users
+    if (user?.role === 'admin' && ['patients', 'predictions', 'analytics'].includes(item.title)) {
+      return false;
+    }
+    // Hide admin panel for non-admin users
+    if (user?.role !== 'admin' && item.title === 'userList') {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <Sidebar className={collapsed ? 'w-14' : 'w-60'} collapsible="icon">
@@ -46,7 +59,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {filteredMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
