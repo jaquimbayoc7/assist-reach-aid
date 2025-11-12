@@ -72,7 +72,7 @@ class ApiService {
   }
 
   async registerDoctor(data: RegisterData): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/admin/users/register`, {
+    const response = await fetch(`${API_BASE_URL}/admin/admin/users/register`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
