@@ -130,6 +130,24 @@ export default function Patients() {
 
   const handleSavePatient = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar que todos los niveles estén entre 0 y 100
+    const levels = [
+      formData.nivel_d1,
+      formData.nivel_d2,
+      formData.nivel_d3,
+      formData.nivel_d4,
+      formData.nivel_d5,
+      formData.nivel_d6
+    ];
+    
+    const invalidLevels = levels.some(level => level < 0 || level > 100);
+    
+    if (invalidLevels) {
+      toast.error('Todos los niveles deben estar entre 0 y 100');
+      return;
+    }
+    
     try {
       if (editingPatient) {
         await patientService.updatePatient(editingPatient.id, formData);
@@ -364,6 +382,8 @@ export default function Patients() {
                 <Input
                   id="nivel_d1"
                   type="number"
+                  min="0"
+                  max="100"
                   value={formData.nivel_d1}
                   onChange={(e) => {
                     const newValue = Number(e.target.value);
@@ -380,6 +400,8 @@ export default function Patients() {
                 <Input
                   id="nivel_d2"
                   type="number"
+                  min="0"
+                  max="100"
                   value={formData.nivel_d2}
                   onChange={(e) => {
                     const newValue = Number(e.target.value);
@@ -396,6 +418,8 @@ export default function Patients() {
                 <Input
                   id="nivel_d3"
                   type="number"
+                  min="0"
+                  max="100"
                   value={formData.nivel_d3}
                   onChange={(e) => {
                     const newValue = Number(e.target.value);
@@ -412,6 +436,8 @@ export default function Patients() {
                 <Input
                   id="nivel_d4"
                   type="number"
+                  min="0"
+                  max="100"
                   value={formData.nivel_d4}
                   onChange={(e) => {
                     const newValue = Number(e.target.value);
@@ -428,6 +454,8 @@ export default function Patients() {
                 <Input
                   id="nivel_d5"
                   type="number"
+                  min="0"
+                  max="100"
                   value={formData.nivel_d5}
                   onChange={(e) => {
                     const newValue = Number(e.target.value);
@@ -444,6 +472,8 @@ export default function Patients() {
                 <Input
                   id="nivel_d6"
                   type="number"
+                  min="0"
+                  max="100"
                   value={formData.nivel_d6}
                   onChange={(e) => {
                     const newValue = Number(e.target.value);
