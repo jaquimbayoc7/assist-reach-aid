@@ -64,6 +64,13 @@ class PatientService {
       headers: this.getHeaders(),
     });
 
+    if (response.status === 401) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userRole');
+      window.location.href = '/login';
+      throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+    }
+
     if (!response.ok) {
       throw new Error('Error al obtener pacientes');
     }
@@ -105,8 +112,16 @@ class PatientService {
       body: JSON.stringify(patient),
     });
 
+    if (response.status === 401) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userRole');
+      window.location.href = '/login';
+      throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+    }
+
     if (!response.ok) {
-      throw new Error('Error al actualizar paciente');
+      const error = await response.json().catch(() => ({ detail: 'Error al actualizar paciente' }));
+      throw new Error(error.detail || 'Error al actualizar paciente');
     }
 
     return response.json();
@@ -117,6 +132,13 @@ class PatientService {
       method: 'DELETE',
       headers: this.getHeaders(),
     });
+
+    if (response.status === 401) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userRole');
+      window.location.href = '/login';
+      throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+    }
 
     if (!response.ok) {
       throw new Error('Error al eliminar paciente');
