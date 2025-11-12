@@ -15,27 +15,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { apiService } from '@/services/api';
 
 export default function LoginLanding() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  
-  // Register form
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
-  const [registerName, setRegisterName] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
+  const [loginType, setLoginType] = useState<'doctor' | 'admin'>('doctor');
   
   const { user, login } = useAuth();
   const { language, setLanguage, t } = useLanguage();
@@ -58,30 +43,6 @@ export default function LoginLanding() {
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsRegistering(true);
-    
-    try {
-      await apiService.registerDoctor({
-        email: registerEmail,
-        password: registerPassword,
-        full_name: registerName,
-        role: 'médico'
-      });
-      
-      toast.success('Registro exitoso. Por favor inicie sesión.');
-      setShowRegister(false);
-      setRegisterEmail('');
-      setRegisterPassword('');
-      setRegisterName('');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al registrarse');
-    } finally {
-      setIsRegistering(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
       {/* Header */}
@@ -94,81 +55,21 @@ export default function LoginLanding() {
             <h1 className="text-xl font-bold">DisabilityProfile</h1>
           </div>
           
-          <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Globe className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setLanguage('en')}>
-                  <span className={language === 'en' ? 'font-bold' : ''}>English</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLanguage('es')}>
-                  <span className={language === 'es' ? 'font-bold' : ''}>Español</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Dialog open={showRegister} onOpenChange={setShowRegister}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  {language === 'es' ? 'Registrarse' : 'Sign Up'}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    {language === 'es' ? 'Registro de Médico' : 'Doctor Registration'}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {language === 'es' 
-                      ? 'Complete el formulario para crear su cuenta médica' 
-                      : 'Fill out the form to create your medical account'}
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="register-name">
-                      {language === 'es' ? 'Nombre Completo' : 'Full Name'}
-                    </Label>
-                    <Input
-                      id="register-name"
-                      value={registerName}
-                      onChange={(e) => setRegisterName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="register-email">{t('email')}</Label>
-                    <Input
-                      id="register-email"
-                      type="email"
-                      value={registerEmail}
-                      onChange={(e) => setRegisterEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="register-password">{t('password')}</Label>
-                    <Input
-                      id="register-password"
-                      type="password"
-                      value={registerPassword}
-                      onChange={(e) => setRegisterPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isRegistering}>
-                    {isRegistering 
-                      ? (language === 'es' ? 'Registrando...' : 'Registering...') 
-                      : (language === 'es' ? 'Registrarse' : 'Sign Up')}
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Globe className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setLanguage('en')}>
+                <span className={language === 'en' ? 'font-bold' : ''}>English</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage('es')}>
+                <span className={language === 'es' ? 'font-bold' : ''}>Español</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
@@ -226,14 +127,38 @@ export default function LoginLanding() {
 
         {/* Login Card */}
         <Card className="shadow-xl">
-          <CardHeader className="space-y-1">
+          <CardHeader className="space-y-3">
+            <div className="flex gap-2 p-1 bg-muted rounded-lg">
+              <Button
+                type="button"
+                variant={loginType === 'doctor' ? 'default' : 'ghost'}
+                className="flex-1"
+                onClick={() => setLoginType('doctor')}
+              >
+                {language === 'es' ? 'Médico' : 'Doctor'}
+              </Button>
+              <Button
+                type="button"
+                variant={loginType === 'admin' ? 'default' : 'ghost'}
+                className="flex-1"
+                onClick={() => setLoginType('admin')}
+              >
+                {language === 'es' ? 'Administrador' : 'Admin'}
+              </Button>
+            </div>
             <CardTitle className="text-2xl">
-              {language === 'es' ? 'Acceso Médico' : 'Medical Access'}
+              {loginType === 'admin' 
+                ? (language === 'es' ? 'Acceso Administrador' : 'Admin Access')
+                : (language === 'es' ? 'Acceso Médico' : 'Doctor Access')}
             </CardTitle>
             <CardDescription>
-              {language === 'es'
-                ? 'Ingrese sus credenciales para acceder al sistema'
-                : 'Enter your credentials to access the system'}
+              {loginType === 'admin'
+                ? (language === 'es' 
+                  ? 'Gestione usuarios y configuración del sistema'
+                  : 'Manage users and system configuration')
+                : (language === 'es'
+                  ? 'Ingrese sus credenciales para acceder al sistema'
+                  : 'Enter your credentials to access the system')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -243,7 +168,7 @@ export default function LoginLanding() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="doctor@example.com"
+                  placeholder={loginType === 'admin' ? 'admin@salud.co' : 'doctor@example.com'}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -262,12 +187,6 @@ export default function LoginLanding() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? t('loading') : t('login')}
               </Button>
-              
-              <p className="text-sm text-center text-muted-foreground">
-                {language === 'es'
-                  ? '¿No tiene cuenta? Use el botón Registrarse arriba'
-                  : "Don't have an account? Use the Sign Up button above"}
-              </p>
             </form>
           </CardContent>
         </Card>
