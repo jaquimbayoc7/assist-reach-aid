@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Download, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -179,6 +182,52 @@ export default function Patients() {
     patient.nombre_apellidos.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleExportExcel = () => {
+    const dataToExport = filteredPatients.map(patient => ({
+      'Nombre y Apellidos': patient.nombre_apellidos,
+      'Edad': patient.edad,
+      'Género': patient.genero,
+      'Causa de Deficiencia': patient.causa_deficiencia,
+      'Categoría Física': patient.cat_fisica,
+      'Categoría Psicosocial': patient.cat_psicosocial,
+      'Nivel Global': patient.nivel_global,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Pacientes');
+    XLSX.writeFile(wb, `pacientes_${new Date().toISOString().split('T')[0]}.xlsx`);
+    toast.success('Archivo Excel descargado exitosamente');
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(18);
+    doc.text('Lista de Pacientes', 14, 20);
+    
+    const tableData = filteredPatients.map(patient => [
+      patient.nombre_apellidos,
+      patient.edad,
+      patient.genero,
+      patient.causa_deficiencia,
+      patient.cat_fisica,
+      patient.cat_psicosocial,
+      patient.nivel_global,
+    ]);
+
+    autoTable(doc, {
+      head: [['Nombre', 'Edad', 'Género', 'Causa Deficiencia', 'Cat. Física', 'Cat. Psicosocial', 'Nivel Global']],
+      body: tableData,
+      startY: 30,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [59, 130, 246] },
+    });
+
+    doc.save(`pacientes_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success('Archivo PDF descargado exitosamente');
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -206,6 +255,24 @@ export default function Patients() {
                 className="pl-10"
               />
             </div>
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={handleExportExcel}
+              disabled={filteredPatients.length === 0}
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Excel
+            </Button>
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={handleExportPDF}
+              disabled={filteredPatients.length === 0}
+            >
+              <Download className="h-4 w-4" />
+              PDF
+            </Button>
           </div>
 
           {isLoading ? (
@@ -233,6 +300,9 @@ export default function Patients() {
                   <TableHead>{t('patientName')}</TableHead>
                   <TableHead>{t('age')}</TableHead>
                   <TableHead>{t('gender')}</TableHead>
+                  <TableHead>{t('deficiencyCause')}</TableHead>
+                  <TableHead>Cat. Física</TableHead>
+                  <TableHead>Cat. Psicosocial</TableHead>
                   <TableHead>{t('globalLevel')}</TableHead>
                   <TableHead className="text-right">{t('actions')}</TableHead>
                 </TableRow>
@@ -243,6 +313,9 @@ export default function Patients() {
                     <TableCell className="font-medium">{patient.nombre_apellidos}</TableCell>
                     <TableCell>{patient.edad}</TableCell>
                     <TableCell>{patient.genero}</TableCell>
+                    <TableCell>{patient.causa_deficiencia}</TableCell>
+                    <TableCell>{patient.cat_fisica}</TableCell>
+                    <TableCell>{patient.cat_psicosocial}</TableCell>
                     <TableCell>{patient.nivel_global}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
