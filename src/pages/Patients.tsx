@@ -41,11 +41,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { patientService, Patient, PatientCreate } from '@/services/patients';
 import { toast } from 'sonner';
 
 export default function Patients() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -183,6 +185,12 @@ export default function Patients() {
   );
 
   const handleExportExcel = () => {
+    const now = new Date();
+    const fechaHora = now.toLocaleString('es-ES', { 
+      dateStyle: 'full', 
+      timeStyle: 'short' 
+    });
+    
     const dataToExport = filteredPatients.map(patient => ({
       'Nombre y Apellidos': patient.nombre_apellidos,
       'Edad': patient.edad,
@@ -194,17 +202,41 @@ export default function Patients() {
     }));
 
     const ws = XLSX.utils.json_to_sheet(dataToExport);
+    
+    // Agregar información del reporte al inicio
+    XLSX.utils.sheet_add_aoa(ws, [
+      ['REPORTE DE PACIENTES'],
+      ['Fecha y Hora del Reporte:', fechaHora],
+      ['Médico Tratante:', user?.name || user?.email || 'No disponible'],
+      [], // Fila vacía para separación
+    ], { origin: 'A1' });
+    
+    // Ajustar el rango para incluir las nuevas filas
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    range.e.r += 4; // Añadir 4 filas al final
+    ws['!ref'] = XLSX.utils.encode_range(range);
+    
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Pacientes');
-    XLSX.writeFile(wb, `pacientes_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(wb, `pacientes_${now.toISOString().split('T')[0]}.xlsx`);
     toast.success('Archivo Excel descargado exitosamente');
   };
 
   const handleExportPDF = () => {
+    const now = new Date();
+    const fechaHora = now.toLocaleString('es-ES', { 
+      dateStyle: 'full', 
+      timeStyle: 'short' 
+    });
+    
     const doc = new jsPDF();
     
     doc.setFontSize(18);
-    doc.text('Lista de Pacientes', 14, 20);
+    doc.text('REPORTE DE PACIENTES', 14, 20);
+    
+    doc.setFontSize(10);
+    doc.text(`Fecha y Hora del Reporte: ${fechaHora}`, 14, 30);
+    doc.text(`Médico Tratante: ${user?.name || user?.email || 'No disponible'}`, 14, 37);
     
     const tableData = filteredPatients.map(patient => [
       patient.nombre_apellidos,
@@ -219,12 +251,12 @@ export default function Patients() {
     autoTable(doc, {
       head: [['Nombre', 'Edad', 'Género', 'Causa Deficiencia', 'Cat. Física', 'Cat. Psicosocial', 'Nivel Global']],
       body: tableData,
-      startY: 30,
+      startY: 45,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [59, 130, 246] },
     });
 
-    doc.save(`pacientes_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`pacientes_${now.toISOString().split('T')[0]}.pdf`);
     toast.success('Archivo PDF descargado exitosamente');
   };
 
