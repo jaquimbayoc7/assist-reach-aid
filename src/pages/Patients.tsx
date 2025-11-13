@@ -203,18 +203,16 @@ export default function Patients() {
 
     const ws = XLSX.utils.json_to_sheet(dataToExport);
     
-    // Agregar información del reporte al inicio
+    // Agregar información del reporte al final
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    const startRow = range.e.r + 2; // Dos filas después de los datos
+    
     XLSX.utils.sheet_add_aoa(ws, [
+      [], // Fila vacía para separación
       ['REPORTE DE PACIENTES'],
       ['Fecha y Hora del Reporte:', fechaHora],
-      ['Médico Tratante:', user?.name || user?.email || 'No disponible'],
-      [], // Fila vacía para separación
-    ], { origin: 'A1' });
-    
-    // Ajustar el rango para incluir las nuevas filas
-    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-    range.e.r += 4; // Añadir 4 filas al final
-    ws['!ref'] = XLSX.utils.encode_range(range);
+      ['Médico Tratante:', `Dr. ${user?.name || user?.email || 'No disponible'}`],
+    ], { origin: `A${startRow}` });
     
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Pacientes');
@@ -231,13 +229,6 @@ export default function Patients() {
     
     const doc = new jsPDF();
     
-    doc.setFontSize(18);
-    doc.text('REPORTE DE PACIENTES', 14, 20);
-    
-    doc.setFontSize(10);
-    doc.text(`Fecha y Hora del Reporte: ${fechaHora}`, 14, 30);
-    doc.text(`Médico Tratante: ${user?.name || user?.email || 'No disponible'}`, 14, 37);
-    
     const tableData = filteredPatients.map(patient => [
       patient.nombre_apellidos,
       patient.edad,
@@ -251,10 +242,20 @@ export default function Patients() {
     autoTable(doc, {
       head: [['Nombre', 'Edad', 'Género', 'Causa Deficiencia', 'Cat. Física', 'Cat. Psicosocial', 'Nivel Global']],
       body: tableData,
-      startY: 45,
+      startY: 20,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [59, 130, 246] },
     });
+
+    // Agregar información del reporte al final
+    const finalY = (doc as any).lastAutoTable.finalY || 20;
+    
+    doc.setFontSize(12);
+    doc.text('REPORTE DE PACIENTES', 14, finalY + 15);
+    
+    doc.setFontSize(10);
+    doc.text(`Fecha y Hora del Reporte: ${fechaHora}`, 14, finalY + 23);
+    doc.text(`Médico Tratante: Dr. ${user?.name || user?.email || 'No disponible'}`, 14, finalY + 30);
 
     doc.save(`pacientes_${now.toISOString().split('T')[0]}.pdf`);
     toast.success('Archivo PDF descargado exitosamente');
