@@ -43,9 +43,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const tokenPayload = JSON.parse(atob(response.access_token.split('.')[1]));
       
       const userData: User = {
-        id: 0, // Will be populated when we fetch user details
+        id: tokenPayload.user_id || 0,
         email: tokenPayload.sub,
-        name: tokenPayload.sub.split('@')[0],
+        name: tokenPayload.full_name || tokenPayload.name || tokenPayload.sub.split('@')[0],
         role: tokenPayload.role || 'médico',
       };
       

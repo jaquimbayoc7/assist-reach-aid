@@ -228,6 +228,22 @@ export default function Patients() {
     });
     
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Agregar información del reporte centrada antes de la tabla
+    doc.setFontSize(14);
+    const titulo = 'REPORTE DE PACIENTES';
+    const tituloWidth = doc.getTextWidth(titulo);
+    doc.text(titulo, (pageWidth - tituloWidth) / 2, 20);
+    
+    doc.setFontSize(10);
+    const fecha = `Fecha y Hora del Reporte: ${fechaHora}`;
+    const fechaWidth = doc.getTextWidth(fecha);
+    doc.text(fecha, (pageWidth - fechaWidth) / 2, 28);
+    
+    const medico = `Médico Tratante: Dr. ${user?.name || user?.email || 'No disponible'}`;
+    const medicoWidth = doc.getTextWidth(medico);
+    doc.text(medico, (pageWidth - medicoWidth) / 2, 35);
     
     const tableData = filteredPatients.map(patient => [
       patient.nombre_apellidos,
@@ -242,20 +258,10 @@ export default function Patients() {
     autoTable(doc, {
       head: [['Nombre', 'Edad', 'Género', 'Causa Deficiencia', 'Cat. Física', 'Cat. Psicosocial', 'Nivel Global']],
       body: tableData,
-      startY: 20,
+      startY: 45,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [59, 130, 246] },
     });
-
-    // Agregar información del reporte al final
-    const finalY = (doc as any).lastAutoTable.finalY || 20;
-    
-    doc.setFontSize(12);
-    doc.text('REPORTE DE PACIENTES', 14, finalY + 15);
-    
-    doc.setFontSize(10);
-    doc.text(`Fecha y Hora del Reporte: ${fechaHora}`, 14, finalY + 23);
-    doc.text(`Médico Tratante: Dr. ${user?.name || user?.email || 'No disponible'}`, 14, finalY + 30);
 
     doc.save(`pacientes_${now.toISOString().split('T')[0]}.pdf`);
     toast.success('Archivo PDF descargado exitosamente');
