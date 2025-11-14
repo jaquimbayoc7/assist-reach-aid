@@ -13,6 +13,7 @@ import Predictions from "./pages/Predictions";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
+import PredictiveGuide from "./pages/PredictiveGuide";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/patients" element={<Patients />} />
                 <Route path="/predictions" element={<Predictions />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/predictive-guide" element={<PredictiveGuide />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/admin" element={<AdminPanel />} />
               </Route>
