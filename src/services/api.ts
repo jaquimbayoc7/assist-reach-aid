@@ -28,6 +28,14 @@ export interface TokenResponse {
 class ApiService {
   private token: string | null = null;
 
+  constructor() {
+    // Inicializar el token desde localStorage al crear la instancia
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken) {
+      this.token = storedToken;
+    }
+  }
+
   setToken(token: string) {
     this.token = token;
     localStorage.setItem('authToken', token);
