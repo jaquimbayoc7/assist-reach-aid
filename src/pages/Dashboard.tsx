@@ -58,14 +58,14 @@ export default function Dashboard() {
   
   const patientsWithPredictions = patients.filter(p => p.prediction_profile !== null);
   
-  // Calcular tasa de éxito (promedio de perfiles de predicción)
-  const successRate = patientsWithPredictions.length > 0
-    ? (patientsWithPredictions.reduce((sum, p) => sum + (p.prediction_profile || 0), 0) / patientsWithPredictions.length * 10).toFixed(2)
-    : '0.00';
-
   // Predicciones de hoy (filtrar por última actualización - simplificado)
   const today = new Date().toISOString().split('T')[0];
   const predictionsToday = patientsWithPredictions.length; // Simplificado - necesitaría fecha de predicción
+
+  // Calcular tasa de éxito como porcentaje de predicciones hoy / total de pacientes
+  const successRate = totalPatients > 0
+    ? ((predictionsToday / totalPatients) * 100).toFixed(2)
+    : '0.00';
 
   // Últimos 5 pacientes
   const recentPatients = [...patients].reverse().slice(0, 5);
