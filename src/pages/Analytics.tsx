@@ -28,9 +28,9 @@ export default function Analytics() {
   // Filtrar pacientes con predicciones
   const patientsWithPredictions = patients.filter(p => p.prediction_profile !== null);
 
-  // Datos para gráfica de distribución de perfiles (incluye perfil 0)
-  const profileDistribution = Array.from({ length: 11 }, (_, i) => {
-    const profile = i; // De 0 a 10
+  // Datos para gráfica de distribución de perfiles (0, 1, 2)
+  const profileDistribution = Array.from({ length: 3 }, (_, i) => {
+    const profile = i; // 0, 1, 2
     const count = patientsWithPredictions.filter(p => p.prediction_profile === profile).length;
     return {
       perfil: `Perfil ${profile}`,
