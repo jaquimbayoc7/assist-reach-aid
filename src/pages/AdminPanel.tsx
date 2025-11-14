@@ -11,9 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiService, User } from '@/services/api';
 import { toast } from 'sonner';
-import { UserPlus, Users, Copy, Check, UserCheck, UserX } from 'lucide-react';
-import { MetricCard } from '@/components/dashboard/MetricCard';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { UserPlus, Users, Copy, Check } from 'lucide-react';
 
 export default function AdminPanel() {
   const [registerEmail, setRegisterEmail] = useState('');
@@ -122,139 +120,9 @@ export default function AdminPanel() {
     return matchesSearch && matchesRole;
   });
 
-  // Calculate metrics
-  const totalUsers = users.length;
-  const activeUsers = users.filter(u => u.is_active).length;
-  const inactiveUsers = users.filter(u => !u.is_active).length;
-  const adminUsers = users.filter(u => u.role === 'admin').length;
-  const doctorUsers = users.filter(u => u.role === 'médico').length;
-
-  // Data for pie charts
-  const roleDistributionData = [
-    { name: language === 'es' ? 'Administradores' : 'Administrators', value: adminUsers, color: 'hsl(var(--primary))' },
-    { name: language === 'es' ? 'Médicos' : 'Doctors', value: doctorUsers, color: 'hsl(var(--chart-2))' }
-  ];
-
-  const statusDistributionData = [
-    { name: language === 'es' ? 'Activos' : 'Active', value: activeUsers, color: 'hsl(var(--success))' },
-    { name: language === 'es' ? 'Inactivos' : 'Inactive', value: inactiveUsers, color: 'hsl(var(--destructive))' }
-  ];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">
-          {language === 'es' ? 'Panel de Administración' : 'Admin Panel'}
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          {language === 'es' 
-            ? 'Gestione usuarios y visualice métricas del sistema'
-            : 'Manage users and view system metrics'}
-        </p>
-      </div>
-
-      {/* User Metrics */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard
-          title={language === 'es' ? 'Total Usuarios' : 'Total Users'}
-          value={totalUsers}
-          icon={Users}
-        />
-        <MetricCard
-          title={language === 'es' ? 'Usuarios Activos' : 'Active Users'}
-          value={activeUsers}
-          icon={UserCheck}
-        />
-        <MetricCard
-          title={language === 'es' ? 'Usuarios Inactivos' : 'Inactive Users'}
-          value={inactiveUsers}
-          icon={UserX}
-        />
-      </div>
-
-      {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {language === 'es' ? 'Distribución por Rol' : 'Role Distribution'}
-            </CardTitle>
-            <CardDescription>
-              {language === 'es' 
-                ? 'Usuarios organizados por tipo de rol' 
-                : 'Users organized by role type'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {totalUsers > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={roleDistributionData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {roleDistributionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-                {language === 'es' ? 'No hay datos disponibles' : 'No data available'}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {language === 'es' ? 'Estado de Usuarios' : 'User Status'}
-            </CardTitle>
-            <CardDescription>
-              {language === 'es' 
-                ? 'Usuarios activos vs inactivos' 
-                : 'Active vs inactive users'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {totalUsers > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={statusDistributionData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {statusDistributionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-                {language === 'es' ? 'No hay datos disponibles' : 'No data available'}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">

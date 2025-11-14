@@ -1,22 +1,32 @@
-import { Users, TrendingUp, Target, Calendar } from 'lucide-react';
+import { Users, TrendingUp, Target, Calendar, UserCheck, UserX } from 'lucide-react';
 import { MetricCard } from '@/components/dashboard/MetricCard';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { patientService, type Patient } from '@/services/patients';
+import { apiService, User } from '@/services/api';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export default function Dashboard() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   useEffect(() => {
     loadPatients();
-  }, []);
+    if (user?.role === 'admin') {
+      loadUsers();
+    }
+  }, [user]);
 
   const loadPatients = async () => {
     try {
@@ -27,6 +37,19 @@ export default function Dashboard() {
       console.error('Error loading patients:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const fetchedUsers = await apiService.getUsers();
+      setUsers(fetchedUsers);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 
+        (language === 'es' ? 'Error al cargar usuarios' : 'Error loading users'));
+    } finally {
+      setLoadingUsers(false);
     }
   };
 
@@ -50,7 +73,41 @@ export default function Dashboard() {
   // Historial de predicciones (pacientes con predicción)
   const predictionHistory = patientsWithPredictions.reverse().slice(0, 10);
 
-  const metrics = [
+  // User metrics (admin only)
+  const totalUsers = users.length;
+  const activeUsers = users.filter(u => u.is_active).length;
+  const inactiveUsers = users.filter(u => !u.is_active).length;
+  const adminUsers = users.filter(u => u.role === 'admin').length;
+  const doctorUsers = users.filter(u => u.role === 'médico').length;
+
+  // Data for pie charts (admin only)
+  const roleDistributionData = [
+    { name: language === 'es' ? 'Administradores' : 'Administrators', value: adminUsers, color: 'hsl(var(--primary))' },
+    { name: language === 'es' ? 'Médicos' : 'Doctors', value: doctorUsers, color: 'hsl(var(--chart-2))' }
+  ];
+
+  const statusDistributionData = [
+    { name: language === 'es' ? 'Activos' : 'Active', value: activeUsers, color: 'hsl(var(--success))' },
+    { name: language === 'es' ? 'Inactivos' : 'Inactive', value: inactiveUsers, color: 'hsl(var(--destructive))' }
+  ];
+
+  const metrics = user?.role === 'admin' ? [
+    {
+      title: language === 'es' ? 'Total Usuarios' : 'Total Users',
+      value: totalUsers.toString(),
+      icon: Users,
+    },
+    {
+      title: language === 'es' ? 'Usuarios Activos' : 'Active Users',
+      value: activeUsers.toString(),
+      icon: UserCheck,
+    },
+    {
+      title: language === 'es' ? 'Usuarios Inactivos' : 'Inactive Users',
+      value: inactiveUsers.toString(),
+      icon: UserX,
+    },
+  ] : [
     {
       title: t('totalPatients'),
       value: totalPatients.toString(),
@@ -86,9 +143,15 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">{t('dashboard')}</h1>
+        <h1 className="text-3xl font-bold">
+          {user?.role === 'admin' 
+            ? (language === 'es' ? 'Panel de Administración' : 'Admin Panel')
+            : t('dashboard')}
+        </h1>
         <p className="text-muted-foreground mt-2">
-          Monitor your disability assessment activities
+          {user?.role === 'admin'
+            ? (language === 'es' ? 'Gestione usuarios y visualice métricas del sistema' : 'Manage users and view system metrics')
+            : 'Monitor your disability assessment activities'}
         </p>
       </div>
 
@@ -98,10 +161,95 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>{t('recentPatients')}</CardTitle>
+      {user?.role === 'admin' && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {language === 'es' ? 'Distribución por Rol' : 'Role Distribution'}
+              </CardTitle>
+              <CardDescription>
+                {language === 'es' 
+                  ? 'Usuarios organizados por tipo de rol' 
+                  : 'Users organized by role type'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {totalUsers > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={roleDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {roleDistributionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                  {language === 'es' ? 'No hay datos disponibles' : 'No data available'}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {language === 'es' ? 'Estado de Usuarios' : 'User Status'}
+              </CardTitle>
+              <CardDescription>
+                {language === 'es' 
+                  ? 'Usuarios activos vs inactivos' 
+                  : 'Active vs inactive users'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {totalUsers > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={statusDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {statusDistributionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                  {language === 'es' ? 'No hay datos disponibles' : 'No data available'}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {user?.role !== 'admin' && (
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>{t('recentPatients')}</CardTitle>
             <Button variant="ghost" size="sm" onClick={() => navigate('/patients')}>
               {t('viewAll')}
             </Button>
@@ -173,7 +321,8 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
