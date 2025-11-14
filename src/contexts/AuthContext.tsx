@@ -59,8 +59,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         navigate('/dashboard');
       }
     } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+      // Handle authentication errors silently
+      throw new Error('Correo electrónico o contraseña incorrectos');
     }
   };
 

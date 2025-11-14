@@ -37,6 +37,7 @@ export default function LoginLanding() {
       await login(email, password);
       toast.success(t('success'));
     } catch (error) {
+      // Show user-friendly error message without logging to console
       toast.error(error instanceof Error ? error.message : t('error'));
     } finally {
       setIsLoading(false);
