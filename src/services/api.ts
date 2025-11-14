@@ -107,14 +107,28 @@ class ApiService {
   }
 
   async updateUserStatus(userId: number, isActive: boolean): Promise<User> {
+    console.log('Updating user status:', { userId, isActive, token: this.token });
+    
     const response = await fetch(`${API_BASE_URL}/admin/admin/users/${userId}/status`, {
       method: 'PATCH',
       headers: this.getHeaders(),
       body: JSON.stringify({ is_active: isActive }),
     });
 
+    console.log('Response status:', response.status);
+    console.log('Response headers:', response.headers);
+
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Error al actualizar estado' }));
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      
+      let error;
+      try {
+        error = JSON.parse(errorText);
+      } catch {
+        error = { detail: errorText || 'Error al actualizar estado' };
+      }
+      
       throw new Error(error.detail || 'Error al actualizar estado del usuario');
     }
 
