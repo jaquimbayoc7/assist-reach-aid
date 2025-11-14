@@ -53,7 +53,7 @@ export default function LoginLanding() {
             <div className="p-2 bg-primary rounded-lg">
               <Activity className="h-6 w-6 text-primary-foreground" />
             </div>
-            <h1 className="text-xl font-bold">DisabilityProfile</h1>
+            <h1 className="text-xl font-bold">Health Access Bridge</h1>
           </div>
           
           <DropdownMenu>

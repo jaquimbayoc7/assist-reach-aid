@@ -53,7 +53,7 @@ export function AppSidebar() {
       <SidebarContent className="pt-4">
         {!collapsed && (
           <div className="px-6 py-4">
-            <h2 className="text-xl font-bold text-primary">DisabilityHub</h2>
+            <h2 className="text-xl font-bold text-primary">Health Access Bridge</h2>
           </div>
         )}
         
