@@ -158,6 +158,38 @@ class PatientService {
 
     return response.json();
   }
+
+  async getAnalytics(): Promise<{
+    totalPatients: number;
+    patientsWithPredictions: number;
+    profileDistribution: { perfil: string; cantidad: number }[];
+    categoryData: {
+      name: string;
+      Leve: number;
+      Moderada: number;
+      Grave: number;
+      Completa: number;
+    }[];
+    averageProfile: number;
+    averageGlobalLevel: number;
+  }> {
+    const response = await fetch(`${API_BASE_URL}/analytics/stats`, {
+      headers: this.getHeaders(),
+    });
+
+    if (response.status === 401) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userRole');
+      window.location.href = '/login';
+      throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+    }
+
+    if (!response.ok) {
+      throw new Error('Error al obtener estadísticas');
+    }
+
+    return response.json();
+  }
 }
 
 export const patientService = new PatientService();
