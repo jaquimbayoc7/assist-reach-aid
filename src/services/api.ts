@@ -107,32 +107,52 @@ class ApiService {
   }
 
   async updateUserStatus(userId: number, isActive: boolean): Promise<User> {
-    console.log('Updating user status:', { userId, isActive, token: this.token });
+    const url = `${API_BASE_URL}/admin/admin/users/${userId}/status`;
+    const token = this.token || localStorage.getItem('authToken');
     
-    const response = await fetch(`${API_BASE_URL}/admin/admin/users/${userId}/status`, {
-      method: 'PATCH',
-      headers: this.getHeaders(),
-      body: JSON.stringify({ is_active: isActive }),
-    });
+    console.log('=== UPDATE USER STATUS DEBUG ===');
+    console.log('URL:', url);
+    console.log('User ID:', userId);
+    console.log('Is Active:', isActive);
+    console.log('Token exists:', !!token);
+    console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
+    
+    try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ is_active: isActive }),
+      });
 
-    console.log('Response status:', response.status);
-    console.log('Response headers:', response.headers);
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error response:', errorText);
-      
-      let error;
-      try {
-        error = JSON.parse(errorText);
-      } catch {
-        error = { detail: errorText || 'Error al actualizar estado' };
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response text:', errorText);
+        
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { detail: errorText || 'Error al actualizar estado' };
+        }
+        
+        throw new Error(error.detail || 'Error al actualizar estado del usuario');
       }
-      
-      throw new Error(error.detail || 'Error al actualizar estado del usuario');
-    }
 
-    return response.json();
+      const data = await response.json();
+      console.log('Success response:', data);
+      return data;
+    } catch (error) {
+      console.error('=== FETCH ERROR ===');
+      console.error('Error type:', error instanceof TypeError ? 'TypeError (Network/CORS issue)' : 'Other');
+      console.error('Error message:', error);
+      throw error;
+    }
   }
 }
 
