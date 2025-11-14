@@ -110,13 +110,6 @@ class ApiService {
     const url = `${API_BASE_URL}/admin/admin/users/${userId}/status`;
     const token = this.token || localStorage.getItem('authToken');
     
-    console.log('=== UPDATE USER STATUS DEBUG ===');
-    console.log('URL:', url);
-    console.log('User ID:', userId);
-    console.log('Is Active:', isActive);
-    console.log('Token exists:', !!token);
-    console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
-    
     try {
       const response = await fetch(url, {
         method: 'PATCH',
@@ -127,30 +120,13 @@ class ApiService {
         body: JSON.stringify({ is_active: isActive }),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response text:', errorText);
-        
-        let error;
-        try {
-          error = JSON.parse(errorText);
-        } catch {
-          error = { detail: errorText || 'Error al actualizar estado' };
-        }
-        
-        throw new Error(error.detail || 'Error al actualizar estado del usuario');
+        const errorData = await response.json().catch(() => ({ detail: 'Error al actualizar estado' }));
+        throw new Error(errorData.detail || 'Error al actualizar estado del usuario');
       }
 
-      const data = await response.json();
-      console.log('Success response:', data);
-      return data;
+      return response.json();
     } catch (error) {
-      console.error('=== FETCH ERROR ===');
-      console.error('Error type:', error instanceof TypeError ? 'TypeError (Network/CORS issue)' : 'Other');
-      console.error('Error message:', error);
       throw error;
     }
   }
