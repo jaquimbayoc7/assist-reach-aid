@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Activity, BarChart3, UserCog, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Activity, BarChart3, UserCog, Settings, LogOut, BookOpen } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -21,6 +21,7 @@ const menuItems = [
   { title: 'patients', url: '/patients', icon: Users },
   { title: 'predictions', url: '/predictions', icon: Activity },
   { title: 'analytics', url: '/analytics', icon: BarChart3 },
+  { title: 'predictiveGuide', url: '/predictive-guide', icon: BookOpen },
   { title: 'userList', url: '/admin', icon: UserCog },
 ];
 
@@ -36,8 +37,8 @@ export function AppSidebar() {
 
   // Filter menu items based on user role
   const filteredMenuItems = menuItems.filter((item) => {
-    // Hide patients, predictions, and analytics for admin users
-    if (user?.role === 'admin' && ['patients', 'predictions', 'analytics'].includes(item.title)) {
+    // Hide patients, predictions, analytics and predictive guide for admin users
+    if (user?.role === 'admin' && ['patients', 'predictions', 'analytics', 'predictiveGuide'].includes(item.title)) {
       return false;
     }
     // Hide admin panel for non-admin users
