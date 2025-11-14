@@ -27,6 +27,8 @@ export default function AdminPanel() {
   const [createdCredentials, setCreatedCredentials] = useState<{email: string, password: string, name: string}>({ email: '', password: '', name: '' });
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'médico'>('all');
   const { language } = useLanguage();
 
   useEffect(() => {
@@ -112,6 +114,13 @@ export default function AdminPanel() {
         (language === 'es' ? 'Error al actualizar estado' : 'Error updating status'));
     }
   };
+
+  // Filter users
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.full_name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
 
   // Calculate metrics
   const totalUsers = users.length;
@@ -342,13 +351,38 @@ export default function AdminPanel() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <Input
+                placeholder={language === 'es' ? 'Buscar por nombre...' : 'Search by name...'}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Select value={roleFilter} onValueChange={(value: 'all' | 'admin' | 'médico') => setRoleFilter(value)}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {language === 'es' ? 'Todos los roles' : 'All roles'}
+                </SelectItem>
+                <SelectItem value="admin">
+                  {language === 'es' ? 'Administrador' : 'Administrator'}
+                </SelectItem>
+                <SelectItem value="médico">
+                  {language === 'es' ? 'Médico' : 'Doctor'}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {isLoadingUsers ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : users.length === 0 ? (
+          ) : filteredUsers.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              {language === 'es' ? 'No hay usuarios registrados' : 'No users registered'}
+              {language === 'es' ? 'No se encontraron usuarios' : 'No users found'}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -363,7 +397,7 @@ export default function AdminPanel() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
+                  {filteredUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">{user.full_name}</TableCell>
                       <TableCell>{user.email}</TableCell>
