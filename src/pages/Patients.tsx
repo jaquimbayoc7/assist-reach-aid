@@ -333,51 +333,109 @@ export default function Patients() {
               </Button>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('patientName')}</TableHead>
-                  <TableHead>{t('age')}</TableHead>
-                  <TableHead>{t('gender')}</TableHead>
-                  <TableHead>{t('deficiencyCause')}</TableHead>
-                  <TableHead>Cat. Física</TableHead>
-                  <TableHead>Cat. Psicosocial</TableHead>
-                  <TableHead>{t('globalLevel')}</TableHead>
-                  <TableHead className="text-right">{t('actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Desktop Table - Hidden on mobile */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('patientName')}</TableHead>
+                      <TableHead>{t('age')}</TableHead>
+                      <TableHead>{t('gender')}</TableHead>
+                      <TableHead>{t('deficiencyCause')}</TableHead>
+                      <TableHead>Cat. Física</TableHead>
+                      <TableHead>Cat. Psicosocial</TableHead>
+                      <TableHead>{t('globalLevel')}</TableHead>
+                      <TableHead className="text-right">{t('actions')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPatients.map((patient) => (
+                      <TableRow key={patient.id}>
+                        <TableCell className="font-medium">{patient.nombre_apellidos}</TableCell>
+                        <TableCell>{patient.edad}</TableCell>
+                        <TableCell>{patient.genero}</TableCell>
+                        <TableCell>{patient.causa_deficiencia}</TableCell>
+                        <TableCell>{patient.cat_fisica}</TableCell>
+                        <TableCell>{patient.cat_psicosocial}</TableCell>
+                        <TableCell>{patient.nivel_global}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => handleOpenDialog(patient)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => setDeletePatient(patient)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Cards - Shown only on mobile */}
+              <div className="md:hidden space-y-4">
                 {filteredPatients.map((patient) => (
-                  <TableRow key={patient.id}>
-                    <TableCell className="font-medium">{patient.nombre_apellidos}</TableCell>
-                    <TableCell>{patient.edad}</TableCell>
-                    <TableCell>{patient.genero}</TableCell>
-                    <TableCell>{patient.causa_deficiencia}</TableCell>
-                    <TableCell>{patient.cat_fisica}</TableCell>
-                    <TableCell>{patient.cat_psicosocial}</TableCell>
-                    <TableCell>{patient.nivel_global}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleOpenDialog(patient)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => setDeletePatient(patient)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                  <Card key={patient.id} className="overflow-hidden">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg">{patient.nombre_apellidos}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {patient.edad} {t('age')} · {patient.genero}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleOpenDialog(patient)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => setDeletePatient(patient)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">{t('deficiencyCause')}:</span>
+                          <span className="font-medium text-right">{patient.causa_deficiencia}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Cat. Física:</span>
+                          <span className="font-medium">{patient.cat_fisica}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Cat. Psicosocial:</span>
+                          <span className="font-medium">{patient.cat_psicosocial}</span>
+                        </div>
+                        <div className="flex justify-between pt-2 border-t">
+                          <span className="text-muted-foreground font-medium">{t('globalLevel')}:</span>
+                          <span className="font-bold text-primary">{patient.nivel_global}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
