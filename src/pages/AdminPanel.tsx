@@ -11,7 +11,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiService, User } from '@/services/api';
 import { toast } from 'sonner';
-import { UserPlus, Users, Copy, Check } from 'lucide-react';
+import { UserPlus, Users, Copy, Check, UserCheck, UserX } from 'lucide-react';
+import { MetricCard } from '@/components/dashboard/MetricCard';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 export default function AdminPanel() {
   const [registerEmail, setRegisterEmail] = useState('');
@@ -49,7 +51,6 @@ export default function AdminPanel() {
     setIsRegistering(true);
     
     try {
-      // Store credentials before clearing the form
       const credentials = {
         email: registerEmail,
         password: registerPassword,
@@ -67,7 +68,6 @@ export default function AdminPanel() {
         ? 'Usuario registrado exitosamente' 
         : 'User registered successfully');
       
-      // Show credentials modal
       setCreatedCredentials(credentials);
       setShowCredentialsModal(true);
       
@@ -113,6 +113,24 @@ export default function AdminPanel() {
     }
   };
 
+  // Calculate metrics
+  const totalUsers = users.length;
+  const activeUsers = users.filter(u => u.is_active).length;
+  const inactiveUsers = users.filter(u => !u.is_active).length;
+  const adminUsers = users.filter(u => u.role === 'admin').length;
+  const doctorUsers = users.filter(u => u.role === 'médico').length;
+
+  // Data for pie charts
+  const roleDistributionData = [
+    { name: language === 'es' ? 'Administradores' : 'Administrators', value: adminUsers, color: 'hsl(var(--primary))' },
+    { name: language === 'es' ? 'Médicos' : 'Doctors', value: doctorUsers, color: 'hsl(var(--chart-2))' }
+  ];
+
+  const statusDistributionData = [
+    { name: language === 'es' ? 'Activos' : 'Active', value: activeUsers, color: 'hsl(var(--success))' },
+    { name: language === 'es' ? 'Inactivos' : 'Inactive', value: inactiveUsers, color: 'hsl(var(--destructive))' }
+  ];
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
@@ -121,9 +139,111 @@ export default function AdminPanel() {
         </h1>
         <p className="text-muted-foreground mt-2">
           {language === 'es' 
-            ? 'Gestione médicos y configuración del sistema'
-            : 'Manage doctors and system configuration'}
+            ? 'Gestione usuarios y visualice métricas del sistema'
+            : 'Manage users and view system metrics'}
         </p>
+      </div>
+
+      {/* User Metrics */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <MetricCard
+          title={language === 'es' ? 'Total Usuarios' : 'Total Users'}
+          value={totalUsers}
+          icon={Users}
+        />
+        <MetricCard
+          title={language === 'es' ? 'Usuarios Activos' : 'Active Users'}
+          value={activeUsers}
+          icon={UserCheck}
+        />
+        <MetricCard
+          title={language === 'es' ? 'Usuarios Inactivos' : 'Inactive Users'}
+          value={inactiveUsers}
+          icon={UserX}
+        />
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {language === 'es' ? 'Distribución por Rol' : 'Role Distribution'}
+            </CardTitle>
+            <CardDescription>
+              {language === 'es' 
+                ? 'Usuarios organizados por tipo de rol' 
+                : 'Users organized by role type'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {totalUsers > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={roleDistributionData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {roleDistributionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                {language === 'es' ? 'No hay datos disponibles' : 'No data available'}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {language === 'es' ? 'Estado de Usuarios' : 'User Status'}
+            </CardTitle>
+            <CardDescription>
+              {language === 'es' 
+                ? 'Usuarios activos vs inactivos' 
+                : 'Active vs inactive users'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {totalUsers > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={statusDistributionData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {statusDistributionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                {language === 'es' ? 'No hay datos disponibles' : 'No data available'}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -201,7 +321,7 @@ export default function AdminPanel() {
             <Button type="submit" className="w-full" disabled={isRegistering}>
               {isRegistering 
                 ? (language === 'es' ? 'Registrando...' : 'Registering...') 
-                : (language === 'es' ? 'Registrar Usuario' : 'Register User')}
+                : (language === 'es' ? 'Crear Usuario' : 'Create User')}
             </Button>
           </form>
         </CardContent>
@@ -217,41 +337,41 @@ export default function AdminPanel() {
           </div>
           <CardDescription>
             {language === 'es' 
-              ? 'Lista de todos los usuarios del sistema'
-              : 'List of all system users'}
+              ? 'Visualice y gestione todos los usuarios del sistema'
+              : 'View and manage all system users'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoadingUsers ? (
-            <p className="text-muted-foreground text-center py-4">
-              {language === 'es' ? 'Cargando usuarios...' : 'Loading users...'}
-            </p>
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {language === 'es' ? 'No hay usuarios registrados' : 'No users registered'}
+            </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{language === 'es' ? 'Nombre' : 'Name'}</TableHead>
-                  <TableHead>{language === 'es' ? 'Email' : 'Email'}</TableHead>
-                  <TableHead>{language === 'es' ? 'Rol' : 'Role'}</TableHead>
-                  <TableHead>{language === 'es' ? 'Estado' : 'Status'}</TableHead>
-                  <TableHead className="text-right">{language === 'es' ? 'Acciones' : 'Actions'}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.length === 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
-                      {language === 'es' ? 'No hay usuarios registrados' : 'No users registered'}
-                    </TableCell>
+                    <TableHead>{language === 'es' ? 'Nombre' : 'Name'}</TableHead>
+                    <TableHead>{language === 'es' ? 'Email' : 'Email'}</TableHead>
+                    <TableHead>{language === 'es' ? 'Rol' : 'Role'}</TableHead>
+                    <TableHead>{language === 'es' ? 'Estado' : 'Status'}</TableHead>
+                    <TableHead className="text-right">{language === 'es' ? 'Acciones' : 'Actions'}</TableHead>
                   </TableRow>
-                ) : (
-                  users.map((user) => (
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">{user.full_name}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
                         <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                          {user.role}
+                          {user.role === 'admin' 
+                            ? (language === 'es' ? 'Administrador' : 'Administrator')
+                            : (language === 'es' ? 'Médico' : 'Doctor')}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -263,58 +383,56 @@ export default function AdminPanel() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Label htmlFor={`status-${user.id}`} className="text-sm">
-                            {language === 'es' ? 'Activo' : 'Active'}
+                          <Label htmlFor={`user-status-${user.id}`} className="text-sm">
+                            {user.is_active 
+                              ? (language === 'es' ? 'Desactivar' : 'Deactivate')
+                              : (language === 'es' ? 'Activar' : 'Activate')}
                           </Label>
                           <Switch
-                            id={`status-${user.id}`}
+                            id={`user-status-${user.id}`}
                             checked={user.is_active}
                             onCheckedChange={() => handleToggleUserStatus(user.id, user.is_active)}
                           />
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
 
+      {/* Credentials Modal */}
       <Dialog open={showCredentialsModal} onOpenChange={setShowCredentialsModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-600" />
+            <DialogTitle>
               {language === 'es' ? 'Usuario Creado Exitosamente' : 'User Created Successfully'}
             </DialogTitle>
             <DialogDescription>
               {language === 'es' 
-                ? 'Guarde estas credenciales y envíelas al usuario. No podrá verlas nuevamente.'
-                : 'Save these credentials and send them to the user. You won\'t be able to see them again.'}
+                ? 'Guarde estas credenciales de forma segura. No podrá verlas nuevamente.'
+                : 'Save these credentials securely. You will not be able to see them again.'}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 mt-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                {language === 'es' ? 'Nombre' : 'Name'}
-              </Label>
-              <div className="flex items-center justify-between p-3 bg-muted rounded-md">
-                <span className="text-sm font-mono">{createdCredentials.name}</span>
+              <Label>{language === 'es' ? 'Nombre' : 'Name'}</Label>
+              <div className="p-3 bg-muted rounded-md">
+                <p className="font-mono">{createdCredentials.name}</p>
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                {language === 'es' ? 'Correo Electrónico' : 'Email'}
-              </Label>
-              <div className="flex items-center gap-2">
+              <Label>{language === 'es' ? 'Correo Electrónico' : 'Email'}</Label>
+              <div className="flex gap-2">
                 <div className="flex-1 p-3 bg-muted rounded-md">
-                  <span className="text-sm font-mono break-all">{createdCredentials.email}</span>
+                  <p className="font-mono">{createdCredentials.email}</p>
                 </div>
                 <Button
-                  size="icon"
                   variant="outline"
+                  size="icon"
                   onClick={() => copyToClipboard(createdCredentials.email, 'email')}
                 >
                   {copiedEmail ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -322,31 +440,24 @@ export default function AdminPanel() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                {language === 'es' ? 'Contraseña' : 'Password'}
-              </Label>
-              <div className="flex items-center gap-2">
+              <Label>{language === 'es' ? 'Contraseña' : 'Password'}</Label>
+              <div className="flex gap-2">
                 <div className="flex-1 p-3 bg-muted rounded-md">
-                  <span className="text-sm font-mono break-all">{createdCredentials.password}</span>
+                  <p className="font-mono">{createdCredentials.password}</p>
                 </div>
                 <Button
-                  size="icon"
                   variant="outline"
+                  size="icon"
                   onClick={() => copyToClipboard(createdCredentials.password, 'password')}
                 >
                   {copiedPassword ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
-            <div className="pt-2 text-sm text-muted-foreground">
-              {language === 'es' 
-                ? '💡 Consejo: Copie estas credenciales y envíelas al usuario por un canal seguro.'
-                : '💡 Tip: Copy these credentials and send them to the user via a secure channel.'}
-            </div>
           </div>
-          <div className="flex justify-end">
+          <div className="mt-6 flex justify-end">
             <Button onClick={() => setShowCredentialsModal(false)}>
-              {language === 'es' ? 'Cerrar' : 'Close'}
+              {language === 'es' ? 'Entendido' : 'Got it'}
             </Button>
           </div>
         </DialogContent>
