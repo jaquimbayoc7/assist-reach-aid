@@ -80,7 +80,7 @@ class ApiService {
   }
 
   async registerDoctor(data: RegisterData): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/admin/admin/users/register`, {
+    const response = await fetch(`${API_BASE_URL}/admin/users/register`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -95,7 +95,7 @@ class ApiService {
   }
 
   async getUsers(skip: number = 0, limit: number = 100): Promise<User[]> {
-    const response = await fetch(`${API_BASE_URL}/admin/admin/users?skip=${skip}&limit=${limit}`, {
+    const response = await fetch(`${API_BASE_URL}/admin/users?skip=${skip}&limit=${limit}`, {
       headers: this.getHeaders(),
     });
 
@@ -107,7 +107,7 @@ class ApiService {
   }
 
   async updateUserStatus(userId: number, isActive: boolean): Promise<User> {
-    const url = `${API_BASE_URL}/admin/admin/users/${userId}/status`;
+    const url = `${API_BASE_URL}/admin/users/${userId}/status`;
     const token = this.token || localStorage.getItem('authToken');
     
     try {
