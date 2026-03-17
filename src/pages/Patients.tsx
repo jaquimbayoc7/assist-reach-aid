@@ -54,10 +54,11 @@ export default function Patients() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
   const [deletePatient, setDeletePatient] = useState<Patient | null>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState<PatientCreate>({
     nombre_apellidos: '',
+    numero_documento: '',
     fecha_nacimiento: '',
     edad: 0,
     genero: '',
@@ -75,13 +76,16 @@ export default function Patients() {
   });
 
   useEffect(() => {
-    loadPatients();
-  }, []);
+    const timer = setTimeout(() => {
+      loadPatients(searchQuery);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-  const loadPatients = async () => {
+  const loadPatients = async (search: string = '') => {
     setIsLoading(true);
     try {
-      const data = await patientService.getPatients();
+      const data = await patientService.getPatients(0, 100, search);
       setPatients(data);
     } catch (error) {
       toast.error(t('errorLoadingPatients'));
@@ -95,6 +99,7 @@ export default function Patients() {
       setEditingPatient(patient);
       setFormData({
         nombre_apellidos: patient.nombre_apellidos,
+        numero_documento: patient.numero_documento,
         fecha_nacimiento: patient.fecha_nacimiento,
         edad: patient.edad,
         genero: patient.genero,
@@ -114,6 +119,7 @@ export default function Patients() {
       setEditingPatient(null);
       setFormData({
         nombre_apellidos: '',
+        numero_documento: '',
         fecha_nacimiento: '',
         edad: 0,
         genero: '',
@@ -135,7 +141,7 @@ export default function Patients() {
 
   const handleSavePatient = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validar que todos los niveles estén entre 0 y 100
     const levels = [
       formData.nivel_d1,
@@ -145,14 +151,14 @@ export default function Patients() {
       formData.nivel_d5,
       formData.nivel_d6
     ];
-    
+
     const invalidLevels = levels.some(level => level < 0 || level > 100);
-    
+
     if (invalidLevels) {
       toast.error('Todos los niveles deben estar entre 0 y 100');
       return;
     }
-    
+
     try {
       if (editingPatient) {
         await patientService.updatePatient(editingPatient.id, formData);
@@ -180,9 +186,7 @@ export default function Patients() {
     }
   };
 
-  const filteredPatients = patients.filter((patient) =>
-    patient.nombre_apellidos.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPatients = patients;
 
   const handleExportExcel = () => {
     const now = new Date();
@@ -190,9 +194,10 @@ export default function Patients() {
       dateStyle: 'full', 
       timeStyle: 'short' 
     });
-    
+
     const dataToExport = filteredPatients.map(patient => ({
       'Nombre y Apellidos': patient.nombre_apellidos,
+      'Nº Documento': patient.numero_documento,
       'Edad': patient.edad,
       'Género': patient.genero,
       'Causa de Deficiencia': patient.causa_deficiencia,
@@ -202,18 +207,18 @@ export default function Patients() {
     }));
 
     const ws = XLSX.utils.json_to_sheet(dataToExport);
-    
+
     // Agregar información del reporte al final
     const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
     const startRow = range.e.r + 2; // Dos filas después de los datos
-    
+
     XLSX.utils.sheet_add_aoa(ws, [
       [], // Fila vacía para separación
       ['REPORTE DE PACIENTES'],
       ['Fecha y Hora del Reporte:', fechaHora],
       ['Médico Tratante:', `Dr. ${user?.name || user?.email || 'No disponible'}`],
     ], { origin: `A${startRow}` });
-    
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Pacientes');
     XLSX.writeFile(wb, `pacientes_${now.toISOString().split('T')[0]}.xlsx`);
@@ -226,27 +231,28 @@ export default function Patients() {
       dateStyle: 'full', 
       timeStyle: 'short' 
     });
-    
+
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    
+
     // Agregar información del reporte centrada antes de la tabla
     doc.setFontSize(14);
     const titulo = 'REPORTE DE PACIENTES';
     const tituloWidth = doc.getTextWidth(titulo);
     doc.text(titulo, (pageWidth - tituloWidth) / 2, 20);
-    
+
     doc.setFontSize(10);
     const fecha = `Fecha y Hora del Reporte: ${fechaHora}`;
     const fechaWidth = doc.getTextWidth(fecha);
     doc.text(fecha, (pageWidth - fechaWidth) / 2, 28);
-    
+
     const medico = `Médico Tratante: Dr. ${user?.name || user?.email || 'No disponible'}`;
     const medicoWidth = doc.getTextWidth(medico);
     doc.text(medico, (pageWidth - medicoWidth) / 2, 35);
-    
+
     const tableData = filteredPatients.map(patient => [
       patient.nombre_apellidos,
+      patient.numero_documento,
       patient.edad,
       patient.genero,
       patient.causa_deficiencia,
@@ -256,7 +262,7 @@ export default function Patients() {
     ]);
 
     autoTable(doc, {
-      head: [['Nombre', 'Edad', 'Género', 'Causa Deficiencia', 'Cat. Física', 'Cat. Psicosocial', 'Nivel Global']],
+      head: [['Nombre', 'Nº Documento', 'Edad', 'Género', 'Causa Deficiencia', 'Cat. Física', 'Cat. Psicosocial', 'Nivel Global']],
       body: tableData,
       startY: 45,
       styles: { fontSize: 8 },
@@ -340,6 +346,7 @@ export default function Patients() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t('patientName')}</TableHead>
+                      <TableHead>Nº Documento</TableHead>
                       <TableHead>{t('age')}</TableHead>
                       <TableHead>{t('gender')}</TableHead>
                       <TableHead>{t('deficiencyCause')}</TableHead>
@@ -353,6 +360,7 @@ export default function Patients() {
                     {filteredPatients.map((patient) => (
                       <TableRow key={patient.id}>
                         <TableCell className="font-medium">{patient.nombre_apellidos}</TableCell>
+                        <TableCell>{patient.numero_documento}</TableCell>
                         <TableCell>{patient.edad}</TableCell>
                         <TableCell>{patient.genero}</TableCell>
                         <TableCell>{patient.causa_deficiencia}</TableCell>
@@ -451,7 +459,7 @@ export default function Patients() {
           </DialogHeader>
           <form onSubmit={handleSavePatient} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 space-y-2">
+              <div className="space-y-2">
                 <Label htmlFor="nombre_apellidos">{t('fullName')}</Label>
                 <Input
                   id="nombre_apellidos"
@@ -460,7 +468,18 @@ export default function Patients() {
                   required
                 />
               </div>
-              
+
+              <div className="space-y-2">
+                <Label htmlFor="numero_documento">Nº Documento</Label>
+                <Input
+                  id="numero_documento"
+                  placeholder="Ej: 1001234567"
+                  value={formData.numero_documento}
+                  onChange={(e) => setFormData({ ...formData, numero_documento: e.target.value })}
+                  required
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="fecha_nacimiento">{t('birthDate')}</Label>
                 <Input

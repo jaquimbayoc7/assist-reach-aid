@@ -2,8 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import LoginLanding from "./pages/LoginLanding";
@@ -17,6 +17,13 @@ import PredictiveGuide from "./pages/PredictiveGuide";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const AdminRoute = () => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'admin') return <Navigate to="/dashboard" replace />;
+  return <Outlet />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -36,7 +43,9 @@ const App = () => (
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/predictive-guide" element={<PredictiveGuide />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/admin" element={<AdminPanel />} />
+                <Route element={<AdminRoute />}>
+                  <Route path="/admin" element={<AdminPanel />} />
+                </Route>
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

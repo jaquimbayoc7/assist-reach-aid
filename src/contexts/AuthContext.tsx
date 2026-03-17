@@ -38,28 +38,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiService.login({ username: email, password });
       apiService.setToken(response.access_token);
-      
-      // Decode token to get user info (simple parsing, in production use a proper JWT library)
-      const tokenPayload = JSON.parse(atob(response.access_token.split('.')[1]));
-      
+
+      const me = await apiService.getCurrentUser();
+
       const userData: User = {
-        id: tokenPayload.user_id || 0,
-        email: tokenPayload.sub,
-        name: tokenPayload.full_name || tokenPayload.name || tokenPayload.sub.split('@')[0],
-        role: tokenPayload.role || 'médico',
+        id: me.id,
+        email: me.email,
+        name: me.full_name,
+        role: me.role,
       };
-      
+
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
-      
-      // Redirect based on role
+
       if (userData.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/dashboard');
       }
     } catch (error) {
-      // Handle authentication errors silently
       throw new Error('Correo electrónico o contraseña incorrectos');
     }
   };

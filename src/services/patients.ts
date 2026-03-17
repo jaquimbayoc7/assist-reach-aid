@@ -3,6 +3,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hab-backend-d
 export interface Patient {
   id: number;
   nombre_apellidos: string;
+  numero_documento: string;
   fecha_nacimiento: string;
   edad: number;
   genero: string;
@@ -24,6 +25,7 @@ export interface Patient {
 
 export interface PatientCreate {
   nombre_apellidos: string;
+  numero_documento: string;
   fecha_nacimiento: string;
   edad: number;
   genero: string;
@@ -59,8 +61,10 @@ class PatientService {
     };
   }
 
-  async getPatients(skip: number = 0, limit: number = 100): Promise<Patient[]> {
-    const response = await fetch(`${API_BASE_URL}/patients/?skip=${skip}&limit=${limit}`, {
+  async getPatients(skip: number = 0, limit: number = 100, search: string = ''): Promise<Patient[]> {
+    const params = new URLSearchParams({ skip: String(skip), limit: String(limit) });
+    if (search.trim()) params.append('search', search.trim());
+    const response = await fetch(`${API_BASE_URL}/patients/?${params.toString()}`, {
       headers: this.getHeaders(),
     });
 

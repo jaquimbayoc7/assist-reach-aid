@@ -106,6 +106,18 @@ class ApiService {
     return response.json();
   }
 
+  async getCurrentUser(): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/users/me`, {
+      headers: this.getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al obtener usuario actual');
+    }
+
+    return response.json();
+  }
+
   async updateUserStatus(userId: number, isActive: boolean): Promise<User> {
     const url = `${API_BASE_URL}/admin/users/${userId}/status`;
     const token = this.token || localStorage.getItem('authToken');
