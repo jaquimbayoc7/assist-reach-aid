@@ -1,0 +1,63 @@
+services:
+  # ─────────────────────────────────────────
+  # FRONTEND - DEVELOPMENT (rama: develop)
+  # URL: https://hab-frontend-dev.onrender.com
+  # API: https://hab-backend-dev.onrender.com
+  # ─────────────────────────────────────────
+  - type: web
+    name: hab-frontend-dev
+    runtime: static
+    branch: develop
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://hab-backend-dev.onrender.com
+      - key: VITE_ENVIRONMENT
+        value: development
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ─────────────────────────────────────────
+  # FRONTEND - QA / STAGING (rama: staging)
+  # URL: https://hab-frontend-qa.onrender.com
+  # API: https://hab-backend-qa.onrender.com
+  # ─────────────────────────────────────────
+  - type: web
+    name: hab-frontend-qa
+    runtime: static
+    branch: staging
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://hab-backend-qa.onrender.com
+      - key: VITE_ENVIRONMENT
+        value: staging
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ─────────────────────────────────────────
+  # FRONTEND - PRODUCTION (rama: main)
+  # URL: https://hab-frontend.onrender.com
+  # API: https://hab-backend.onrender.com
+  # ─────────────────────────────────────────
+  - type: web
+    name: hab-frontend
+    runtime: static
+    branch: main
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://hab-backend.onrender.com
+      - key: VITE_ENVIRONMENT
+        value: production
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

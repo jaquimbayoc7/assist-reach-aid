@@ -1,0 +1,86 @@
+name: CI/CD - QA Staging
+
+# ──────────────────────────────────────────────────────────────
+# STAGE 2 — QA
+# Trigger: push o PR a staging
+# Resultado: build pasa → Render auto-despliega hab-frontend-qa
+# ──────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches: [staging]
+  pull_request:
+    branches: [staging]
+
+jobs:
+  frontend-build:
+    name: Frontend Build (QA)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          VITE_API_BASE_URL: https://hab-backend-qa.onrender.com
+          VITE_ENVIRONMENT: staging
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint
+
+  frontend-smoke-test:
+    name: Frontend Smoke Test (QA)
+    runs-on: ubuntu-latest
+    needs: [frontend-build]
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+
+    steps:
+      - name: Wait for Render QA deploy
+        run: |
+          echo "Waiting 60s for Render QA to finish deploying..."
+          sleep 60
+
+      - name: Smoke test — frontend QA accesible
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://hab-frontend-qa.onrender.com)
+          echo "Frontend QA status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Frontend QA not accessible (HTTP $STATUS)"
+            exit 1
+          fi
+          echo "✅ Frontend QA OK"
+
+      - name: Smoke test — backend QA accesible
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://hab-backend-qa.onrender.com/health)
+          echo "Backend QA health: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Backend QA health check failed (HTTP $STATUS)"
+            exit 1
+          fi
+          echo "✅ Backend QA /health OK"
+
+  promote-to-production-gate:
+    name: "🔐 Approval Gate — Promote QA → Production"
+    runs-on: ubuntu-latest
+    needs: [frontend-build, frontend-smoke-test]
+    environment: qa
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+
+    steps:
+      - name: QA approved — ready to promote
+        run: |
+          echo "✅ All QA checks passed."
+          echo "📋 Next step: open a PR from staging → main to deploy to production."
+          echo "   Frontend QA:  https://hab-frontend-qa.onrender.com"
+          echo "   Backend QA:   https://hab-backend-qa.onrender.com"
