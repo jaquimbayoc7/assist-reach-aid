@@ -23,7 +23,7 @@ export default function FunctionalProfile() {
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedReport, setGeneratedReport] = useState<string | null>(null);
+  const [reportPatientId, setReportPatientId] = useState<string | null>(null);
 
   const es = language === 'es';
 
@@ -65,18 +65,20 @@ export default function FunctionalProfile() {
     return colors[profile] || 'bg-muted text-muted-foreground';
   };
 
+  const getGeneratedReport = () => {
+    const rp = patients.find(p => p.id === Number(reportPatientId));
+    return rp ? generateMockReport(rp) : null;
+  };
+
   const handleGenerate = async () => {
     if (!selectedPatient) return;
 
     setIsGenerating(true);
-    setGeneratedReport(null);
+    setReportPatientId(null);
 
-    // Simulate LLM call - this is frontend only, the actual backend integration will be added later
     try {
       await new Promise(resolve => setTimeout(resolve, 2500));
-
-      const mockReport = generateMockReport(selectedPatient);
-      setGeneratedReport(mockReport);
+      setReportPatientId(selectedPatientId);
       toast.success(es ? 'Perfil funcional generado exitosamente' : 'Functional profile generated successfully');
     } catch {
       toast.error(es ? 'Error al generar el perfil' : 'Error generating profile');
@@ -242,15 +244,17 @@ Final classification must be clinically validated.
   };
 
   const handleCopy = () => {
-    if (generatedReport) {
-      navigator.clipboard.writeText(generatedReport);
+    const report = getGeneratedReport();
+    if (report) {
+      navigator.clipboard.writeText(report);
       toast.success(es ? 'Copiado al portapapeles' : 'Copied to clipboard');
     }
   };
 
   const handleDownload = () => {
-    if (!generatedReport || !selectedPatient) return;
-    const blob = new Blob([generatedReport], { type: 'text/plain;charset=utf-8' });
+    const report = getGeneratedReport();
+    if (!report || !selectedPatient) return;
+    const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -395,7 +399,7 @@ Final classification must be clinically validated.
                 <CardTitle>
                   {es ? 'Reporte Generado' : 'Generated Report'}
                 </CardTitle>
-                {generatedReport && (
+                {reportPatientId && (
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={handleCopy}>
                       <Copy className="h-4 w-4 mr-1" />
@@ -419,10 +423,10 @@ Final classification must be clinically validated.
                       : 'Analyzing patient data and generating ICF codes...'}
                   </p>
                 </div>
-              ) : generatedReport ? (
+              ) : reportPatientId ? (
                 <ScrollArea className="h-[600px]">
                   <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-foreground bg-muted p-4 rounded-lg">
-                    {generatedReport}
+                    {getGeneratedReport()}
                   </pre>
                 </ScrollArea>
               ) : (
