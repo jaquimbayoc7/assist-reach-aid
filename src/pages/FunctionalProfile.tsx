@@ -423,10 +423,10 @@ Final classification must be clinically validated.
                       : 'Analyzing patient data and generating ICF codes...'}
                   </p>
                 </div>
-              ) : generatedReport ? (
+              ) : reportPatientId ? (
                 <ScrollArea className="h-[600px]">
                   <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-foreground bg-muted p-4 rounded-lg">
-                    {generatedReport}
+                    {getGeneratedReport()}
                   </pre>
                 </ScrollArea>
               ) : (
