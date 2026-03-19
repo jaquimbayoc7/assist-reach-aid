@@ -16,6 +16,7 @@ const translations = {
     predictions: 'Predictions',
     analytics: 'Analytics',
     predictiveGuide: 'Predictive Guide',
+    functionalProfile: 'Functional Profile',
     userList: 'User List',
     settings: 'Settings',
     logout: 'Logout',
