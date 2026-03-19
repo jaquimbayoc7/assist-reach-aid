@@ -399,7 +399,7 @@ Final classification must be clinically validated.
                 <CardTitle>
                   {es ? 'Reporte Generado' : 'Generated Report'}
                 </CardTitle>
-                {generatedReport && (
+                {reportPatientId && (
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={handleCopy}>
                       <Copy className="h-4 w-4 mr-1" />
