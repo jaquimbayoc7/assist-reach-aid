@@ -65,18 +65,18 @@ export default function FunctionalProfile() {
     return colors[profile] || 'bg-muted text-muted-foreground';
   };
 
+  const reportPatient = patients.find(p => p.id === Number(reportPatientId));
+  const generatedReport = reportPatient ? generateMockReport(reportPatient) : null;
+
   const handleGenerate = async () => {
     if (!selectedPatient) return;
 
     setIsGenerating(true);
-    setGeneratedReport(null);
+    setReportPatientId(null);
 
-    // Simulate LLM call - this is frontend only, the actual backend integration will be added later
     try {
       await new Promise(resolve => setTimeout(resolve, 2500));
-
-      const mockReport = generateMockReport(selectedPatient);
-      setGeneratedReport(mockReport);
+      setReportPatientId(selectedPatientId);
       toast.success(es ? 'Perfil funcional generado exitosamente' : 'Functional profile generated successfully');
     } catch {
       toast.error(es ? 'Error al generar el perfil' : 'Error generating profile');
