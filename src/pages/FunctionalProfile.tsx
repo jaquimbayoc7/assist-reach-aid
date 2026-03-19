@@ -244,15 +244,17 @@ Final classification must be clinically validated.
   };
 
   const handleCopy = () => {
-    if (generatedReport) {
-      navigator.clipboard.writeText(generatedReport);
+    const report = getGeneratedReport();
+    if (report) {
+      navigator.clipboard.writeText(report);
       toast.success(es ? 'Copiado al portapapeles' : 'Copied to clipboard');
     }
   };
 
   const handleDownload = () => {
-    if (!generatedReport || !selectedPatient) return;
-    const blob = new Blob([generatedReport], { type: 'text/plain;charset=utf-8' });
+    const report = getGeneratedReport();
+    if (!report || !selectedPatient) return;
+    const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
