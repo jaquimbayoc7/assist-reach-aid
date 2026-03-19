@@ -65,8 +65,10 @@ export default function FunctionalProfile() {
     return colors[profile] || 'bg-muted text-muted-foreground';
   };
 
-  const reportPatient = patients.find(p => p.id === Number(reportPatientId));
-  const generatedReport = reportPatient ? generateMockReport(reportPatient) : null;
+  const getGeneratedReport = () => {
+    const rp = patients.find(p => p.id === Number(reportPatientId));
+    return rp ? generateMockReport(rp) : null;
+  };
 
   const handleGenerate = async () => {
     if (!selectedPatient) return;
