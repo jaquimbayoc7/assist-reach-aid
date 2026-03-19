@@ -23,7 +23,7 @@ export default function FunctionalProfile() {
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedReport, setGeneratedReport] = useState<string | null>(null);
+  const [reportPatientId, setReportPatientId] = useState<string | null>(null);
 
   const es = language === 'es';
 
