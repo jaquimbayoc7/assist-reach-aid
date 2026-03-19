@@ -14,6 +14,7 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import PredictiveGuide from "./pages/PredictiveGuide";
+import FunctionalProfile from "./pages/FunctionalProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
