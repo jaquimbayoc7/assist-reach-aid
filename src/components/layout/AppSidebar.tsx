@@ -22,6 +22,7 @@ const menuItems = [
   { title: 'predictions', url: '/predictions', icon: Activity },
   { title: 'analytics', url: '/analytics', icon: BarChart3 },
   { title: 'predictiveGuide', url: '/predictive-guide', icon: BookOpen },
+  { title: 'functionalProfile', url: '/functional-profile', icon: FileText },
   { title: 'userList', url: '/admin', icon: UserCog },
 ];
 
