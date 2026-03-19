@@ -43,6 +43,7 @@ const App = () => (
                 <Route path="/predictions" element={<Predictions />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/predictive-guide" element={<PredictiveGuide />} />
+                <Route path="/functional-profile" element={<FunctionalProfile />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route element={<AdminRoute />}>
                   <Route path="/admin" element={<AdminPanel />} />

@@ -39,7 +39,7 @@ export function AppSidebar() {
   // Filter menu items based on user role
   const filteredMenuItems = menuItems.filter((item) => {
     // Hide patients, predictions, analytics and predictive guide for admin users
-    if (user?.role === 'admin' && ['patients', 'predictions', 'analytics', 'predictiveGuide'].includes(item.title)) {
+    if (user?.role === 'admin' && ['patients', 'predictions', 'analytics', 'predictiveGuide', 'functionalProfile'].includes(item.title)) {
       return false;
     }
     // Hide admin panel for non-admin users

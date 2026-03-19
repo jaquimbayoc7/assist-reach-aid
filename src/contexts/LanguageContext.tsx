@@ -103,6 +103,7 @@ const translations = {
     predictions: 'Predicciones',
     analytics: 'Análisis',
     predictiveGuide: 'Guía Predictiva',
+    functionalProfile: 'Perfil Funcional',
     userList: 'Listado de Usuarios',
     settings: 'Configuración',
     logout: 'Cerrar Sesión',
